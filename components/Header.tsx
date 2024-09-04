@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'; // Usamos este hook para obtener la sesión
 import { supabase } from '@/lib/supabaseClient';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
+
 
 const Header = () => {
   const { user } = useSupabaseAuth(); // Usamos el hook personalizado para obtener el usuario
@@ -38,7 +40,13 @@ const Header = () => {
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <Link href="/">
-          <img src="/logo.ico" alt="Company Logo" className="h-12 w-auto" />
+          <Image
+            src="/logo.ico"
+            alt="Company Logo"
+            width={48}  // Ajusta el ancho según tus necesidades
+            height={48} // Ajusta la altura según tus necesidades
+            className="h-12 w-auto"
+          />
         </Link>
 
         {/* Navigation */}
