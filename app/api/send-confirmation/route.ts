@@ -7,11 +7,14 @@ export async function POST(req: NextRequest) {
   console.log('API route hit');
 
   try {
-    const { to, subject, text } = await req.json(); // extraemos 'to', 'subject', 'text'
+    const { to, subject, text } = await req.json();
+
+    // Eliminar direcciones de correo duplicadas
+    const uniqueEmails = [...new Set(to)];
 
     const msg = {
-      to,
-      from: 'drilan@gmail.com', // Dirección desde la que envías el correo (configurada en SendGrid)
+      to: uniqueEmails, // Usamos el array de correos filtrado
+      from: process.env.NEXT_PUBLIC_SHOP_OWNER_EMAIL, // Dirección desde la que envías el correo
       subject,
       text,
     };

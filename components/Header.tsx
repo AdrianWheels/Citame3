@@ -1,14 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'; // Usamos este hook para obtener la sesión
 import { supabase } from '@/lib/supabaseClient';
+import { useState } from 'react';
 
 const Header = () => {
-  const { user } = useSupabaseAuth();
+  const { user } = useSupabaseAuth(); // Usamos el hook personalizado para obtener el usuario
+  const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    setLoading(true);
+    await supabase.auth.signOut(); // Cerrar sesión
+    setLoading(false);
   };
 
   return (
@@ -25,20 +29,17 @@ const Header = () => {
             <button
               onClick={handleLogout}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+              disabled={loading} // Desactivar botón si está en loading
             >
-              Cerrar sesión
+              {loading ? 'Cerrando sesión...' : 'Cerrar sesión'}
             </button>
           ) : (
             <>
-              <Link href="/auth">
-                <a className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-                  Iniciar sesión
-                </a>
+              <Link href="/auth" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+                Iniciar sesión
               </Link>
-              <Link href="/register">
-                <a className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-                  Crear cuenta
-                </a>
+              <Link href="/register" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+                Crear cuenta
               </Link>
             </>
           )}
