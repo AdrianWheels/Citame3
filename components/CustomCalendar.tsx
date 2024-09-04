@@ -29,23 +29,56 @@ const CustomCalendar = () => {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Función para manejar el cambio de fecha en el calendario
   const handleDateChange = (date: Date | Date[]) => {
+    console.log('Valor recibido en onChange:', date);
     const selected = Array.isArray(date) ? date[0] : date;
 
     if (selected) {
-      setSelectedDate(selected);
-      setLoading(true);
+      setSelectedDate(selected); // Guardamos la fecha seleccionada
+      setLoading(true); // Mostramos el estado de carga
 
+      // Formateamos la fecha seleccionada
       const formattedDate = format(selected, 'yyyy-MM-dd', { locale: es });
-      
 
+      // Llamamos a fetchBookings para obtener las reservas para la fecha seleccionada
       fetchBookings(formattedDate).finally(() => {
-        setLoading(false);
+        setLoading(false); // Finalizamos el estado de carga cuando se complete
       });
     }
   };
 
-  const handleBooking = async (time: string) => {
+  // Función para obtener las reservas de la base de datos para una fecha específica
+  const fetchBookings = async (formattedDate: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('reservations')
+        .select('*')
+        .eq('date', formattedDate);
+
+      if (error) throw error;
+
+      const bookingsMap = new Map<string, 'available' | 'confirmed' | 'pending'>();
+
+      data?.forEach((booking: Booking) => {
+        const formattedHour = booking.hour.slice(0, 5); // "HH:mm" formato
+        bookingsMap.set(formattedHour, booking.status as 'available' | 'confirmed' | 'pending');
+      });
+
+      const slots: TimeSlot[] = workingHours.map((hour) => ({
+        time: hour,
+        status: bookingsMap.get(hour) || 'available', // Si no está en la base de datos, está disponible
+      }));
+
+      setTimeSlots(slots); // Actualizamos los horarios disponibles
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+    }
+  };
+
+  
+
+const handleBooking = async (time: string) => {
     if (!selectedDate || !user) {      
       return; // Asegurarse de que el usuario esté disponible
     }
@@ -103,33 +136,6 @@ const CustomCalendar = () => {
     }
   };
 
-  const fetchBookings = async (formattedDate: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('reservations')
-        .select('*')
-        .eq('date', formattedDate);
-
-      if (error) throw error;
-
-      const bookingsMap = new Map<string, 'available' | 'confirmed' | 'pending'>();
-
-      data?.forEach((booking: Booking) => {
-        const formattedHour = booking.hour.slice(0, 5); // "HH:mm" formato
-        bookingsMap.set(formattedHour, booking.status as 'available' | 'confirmed' | 'pending');
-      });
-
-      const slots: TimeSlot[] = workingHours.map((hour) => ({
-        time: hour,
-        status: bookingsMap.get(hour) || 'available',
-      }));
-
-      setTimeSlots(slots);
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
-    }
-  };
-
   return (
     <div className="p-6 max-w-screen-lg mx-auto bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Agenda tu cita</h2>
@@ -137,15 +143,17 @@ const CustomCalendar = () => {
         Selecciona una fecha para ver la disponibilidad de horarios
       </p>
 
+      {/* Componente del calendario */}
       <div className="mb-6 flex justify-center">
         <Calendar
-          onChange={(value: Date | Date[]) => handleDateChange(value)}
-          value={selectedDate}
+          onChange={handleDateChange} // Llamamos a handleDateChange cuando cambia la fecha
+          value={selectedDate} // Pasamos la fecha seleccionada como valor
           locale="es-ES" // Localización en español para react-calendar
           className="bg-white shadow-md rounded-lg"
         />
       </div>
 
+      {/* Mostramos los horarios disponibles después de seleccionar una fecha */}
       {selectedDate && (
         <>
           {loading ? (
