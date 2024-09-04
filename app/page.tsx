@@ -31,25 +31,35 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">      
+    <div className="min-h-screen w-full flex flex-col items-center justify-between bg-gray-50">
+      <header className="w-full py-4 bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <div className="text-2xl font-bold text-gray-800">
+            <img src="/logo.ico" alt="Logo" className="h-12 w-12 inline-block mr-2" />
+            Mi Servicio
+          </div>
+          {session && (
+            <button className="text-red-500 hover:text-red-700 font-bold py-2 px-4 rounded">
+              Cerrar sesión
+            </button>
+          )}
+        </div>
+      </header>
 
-      <main className="flex-grow flex flex-col items-center justify-center py-10 px-4">
+      <main className="flex-grow flex flex-col items-center justify-center py-6 px-4">
         {session ? (
           <>
-            <h1 className="text-4xl font-bold text-gray-800 mb-6">Bienvenido!</h1>
-            <p className="text-gray-600 text-center max-w-xl mb-8">
-              Agenda tus citas rápidamente utilizando nuestro calendario interactivo. Selecciona un día para ver la disponibilidad.
-            </p>
-            <div className="w-full max-w-md bg-white shadow-md rounded-lg p-6">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4 text-center">Bienvenido!</h1>            
+            <div className="w-full max-w-md bg-white shadow-md rounded-lg p-4">
               <CustomCalendar />
             </div>
           </>
         ) : (
           <>
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Inicia Sesión</h1>
-            <p className="text-gray-600 text-center max-w-xl mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-4">Inicia Sesión</h1>
+            <p className="text-gray-600 text-center max-w-md mb-8">
               Por favor, autentícate para poder acceder al calendario y gestionar tus citas.
-            </p>            
+            </p>
           </>
         )}
       </main>

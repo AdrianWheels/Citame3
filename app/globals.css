@@ -32,3 +32,9 @@ body {
     text-wrap: balance;
   }
 }
+
+.react-calendar {
+  max-width: 100% !important;
+  width: auto !important;
+  background-color: rgb(201, 190, 190);
+}

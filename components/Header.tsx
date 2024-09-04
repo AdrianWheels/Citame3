@@ -1,45 +1,51 @@
-// components/Header.tsx
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'
-import { supabase } from '@/lib/supabaseClient'
+import Link from 'next/link';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
+import { supabase } from '@/lib/supabaseClient';
 
-export default function Header() {
-  const { user } = useSupabaseAuth()
+const Header = () => {
+  const { user } = useSupabaseAuth();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-  }
+    await supabase.auth.signOut();
+  };
 
   return (
-    <header className="bg-white shadow p-4">
+    <header className="bg-white shadow-md p-4">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <Link href="/">
-          <img src="/logo.ico" alt="Company Logo" className="h-14 w-auto" />
+          <img src="/logo.ico" alt="Company Logo" className="h-12 w-auto" />
         </Link>
 
-        {/* Navegación */}
-        <nav>
+        {/* Navigation */}
+        <nav className="flex items-center space-x-4">
           {user ? (
-            // Si el usuario está autenticado, mostrar el botón de logout
-            <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 mx-4 rounded">
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+            >
               Cerrar sesión
             </button>
           ) : (
-            // Si no está autenticado, mostrar los links para login y registro
-            <div className="space-x-4">
+            <>
               <Link href="/auth">
-                <span className="bg-blue-500 text-white px-4 py-2 rounded">Iniciar sesión</span>
+                <a className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+                  Iniciar sesión
+                </a>
               </Link>
               <Link href="/register">
-                <span className="bg-green-500 text-white px-4 py-2 rounded">Crear cuenta</span>
+                <a className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+                  Crear cuenta
+                </a>
               </Link>
-            </div>
+            </>
           )}
         </nav>
       </div>
     </header>
-  )
-}
+  );
+};
+
+export default Header;

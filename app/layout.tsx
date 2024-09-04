@@ -1,6 +1,5 @@
 // app/layout.tsx
 import '@/app/globals.css'
-import Header from '@/components/Header'
 
 export const metadata = {
   title: 'My App',
@@ -14,8 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <Header />
+      <body>       
         <main className="container mx-auto p-4">
           {children}
         </main>
