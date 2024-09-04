@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'; // Usamos este hook para obtener la sesión
 import { supabase } from '@/lib/supabaseClient';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const Header = () => {
   const { user } = useSupabaseAuth(); // Usamos el hook personalizado para obtener el usuario
   const [loading, setLoading] = useState(false);
+  const [isScrolledToTop, setIsScrolledToTop] = useState(true);
 
   const handleLogout = async () => {
     setLoading(true);
@@ -15,8 +16,25 @@ const Header = () => {
     setLoading(false);
   };
 
+  // Manejar la visibilidad del header basado en el scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolledToTop(window.scrollY === 0); // true si está al tope, false si se ha scrolleado
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
-    <header className="bg-white shadow-md p-4">
+    <header
+      className={`fixed top-0 w-full p-4 bg-white shadow-md transition-transform duration-300 ${
+        isScrolledToTop ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <Link href="/">
@@ -28,17 +46,23 @@ const Header = () => {
           {user ? (
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+              className="bg-secondary  text-white px-4 py-2 rounded hover:bg-red-600 transition"
               disabled={loading} // Desactivar botón si está en loading
             >
               {loading ? 'Cerrando sesión...' : 'Cerrar sesión'}
             </button>
           ) : (
             <>
-              <Link href="/auth" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+              <Link
+                href="/auth"
+                className="bg-secondary text-white px-4 py-2 rounded hover:bg-opacity-90 transition"
+              >
                 Iniciar sesión
               </Link>
-              <Link href="/register" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+              <Link
+                href="/register"
+                className="bg-secondary text-white px-4 py-2 rounded hover:bg-opacity-90 transition"
+              >
                 Crear cuenta
               </Link>
             </>

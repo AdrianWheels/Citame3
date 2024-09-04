@@ -37,7 +37,7 @@ const CustomCalendar = () => {
       setLoading(true);
 
       const formattedDate = format(selected, 'yyyy-MM-dd', { locale: es });
-      console.log('Fecha seleccionada:', formattedDate); // Imprimir la fecha seleccionada
+      
 
       fetchBookings(formattedDate).finally(() => {
         setLoading(false);
@@ -46,25 +46,20 @@ const CustomCalendar = () => {
   };
 
   const handleBooking = async (time: string) => {
-    if (!selectedDate || !user) {
-      console.log('No se ha seleccionado una fecha o no hay usuario disponible.');
+    if (!selectedDate || !user) {      
       return; // Asegurarse de que el usuario esté disponible
     }
-
-    console.log('Usuario actual:', user);
 
     const formattedDate = format(selectedDate, 'yyyy-MM-dd', { locale: es });
     const shopOwnerEmail = process.env.NEXT_PUBLIC_SHOP_OWNER_EMAIL;
 
-    const userEmail = user?.email;
+    const userEmail = user?.email;    
 
-    if (!userEmail) {
-      console.error('El usuario no tiene un email disponible.');
+    if (!userEmail) {      
       return;
     }
 
-    try {
-      console.log('Preparando para enviar el correo de confirmación...');
+    try {      
 
       const response = await fetch('/api/send-confirmation', {
         method: 'POST',
@@ -80,7 +75,7 @@ const CustomCalendar = () => {
         throw new Error('Error al enviar el correo');
       }
 
-      console.log('Correos enviados con éxito');
+      
 
       const newBooking = {
         date: formattedDate,
@@ -89,14 +84,13 @@ const CustomCalendar = () => {
         user_id: user.id,
       };
 
-      console.log('Preparando para guardar la reserva en la base de datos...', newBooking);
+      
 
       const { error } = await supabase.from('reservations').insert([newBooking]);
 
       if (error) {
         console.error('Error al reservar:', error);
-      } else {
-        console.log('Reserva guardada exitosamente en la base de datos.');
+      } else {        
         alert(`Reserva confirmada para las ${time}`);
 
         await fetchBookings(formattedDate);
@@ -105,7 +99,7 @@ const CustomCalendar = () => {
       console.error('Error al procesar la reserva:', error);
       alert('No se pudo realizar la reserva. Inténtalo nuevamente.');
     } finally {
-      console.log('Proceso de reserva finalizado.');
+      
     }
   };
 
@@ -154,30 +148,28 @@ const CustomCalendar = () => {
 
       {selectedDate && (
         <>
-          <h3 className="text-xl font-semibold text-gray-700 mb-4 text-center">
-            Horarios disponibles para {format(selectedDate, 'dd/MM/yyyy', { locale: es })} {/* Localización en español */}
-          </h3>
           {loading ? (
             <p className="text-center text-gray-500">Cargando horarios...</p>
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {timeSlots.length > 0 ? (
                 timeSlots.map((slot, index) => (
-                  <div
+                  <button
                     key={index}
-                    className={`cursor-pointer p-4 rounded-lg text-center font-medium transition ${
+                    className={`p-4 rounded-lg text-center font-medium transition ${
                       slot.status === 'confirmed'
-                        ? 'bg-red-500 text-white cursor-not-allowed'
-                        : 'bg-green-500 text-white hover:bg-green-600'
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-white text-black border border-black hover:bg-gray-100'
                     }`}
                     onClick={() => {
                       if (slot.status === 'available') {
                         handleBooking(slot.time);
                       }
                     }}
+                    disabled={slot.status === 'confirmed'}
                   >
                     {slot.time} - {slot.status === 'confirmed' ? 'Ocupado' : 'Disponible'}
-                  </div>
+                  </button>
                 ))
               ) : (
                 <p className="text-center text-gray-500">No hay horarios disponibles.</p>

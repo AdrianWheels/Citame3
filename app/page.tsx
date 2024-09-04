@@ -5,13 +5,13 @@ import Header from '@/components/Header'; // Importamos el Header
 
 export default function Home() {
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-between bg-gray-50">
+    <div className="min-h-screen w-full flex flex-col items-center justify-between">
       {/* Añadimos el Header */}
       <Header />
 
-      <main className="flex-grow flex flex-col items-center justify-center py-6 px-4">
+      <main className="flex-grow flex flex-col items-center justify-center py-6 px-4" style={{ paddingTop: '80px' }}>
         {/* Aquí ya no gestionamos la sesión */}
-        <div className="w-full max-w-md bg-white shadow-md rounded-lg p-4">
+        <div className="w-full max-w-md bg-white rounded-lg p-4">
           <CustomCalendar />
         </div>
       </main>
