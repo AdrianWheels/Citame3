@@ -4,8 +4,6 @@ import Link from 'next/link';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'; // Usamos este hook para obtener la sesión
 import { supabase } from '@/lib/supabaseClient';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
-
 
 const Header = () => {
   const { user } = useSupabaseAuth(); // Usamos el hook personalizado para obtener el usuario
@@ -58,20 +56,13 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 w-full p-4 bg-white shadow-md transition-transform duration-300 ${
+      className={`fixed top-0 w-full p-4 bg-[#1a1a1a] text-white shadow-md transition-transform duration-300 ${
         isScrolledToTop ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
-      <div className="container mx-auto flex justify-between items-center">
-        {/* Logo */}
+      <div className="container mx-auto flex justify-between items-center">        
         <Link href="/">
-          <Image
-            src="/logo.ico"
-            alt="Company Logo"
-            width={48}  // Ajusta el ancho según tus necesidades
-            height={48} // Ajusta la altura según tus necesidades
-            className="h-12 w-auto"
-          />
+          <h1 className="text-xl font-bold">Factony Style</h1>
         </Link>
 
         {/* Navigation */}
@@ -88,7 +79,7 @@ const Header = () => {
               )}
               <button
                 onClick={handleLogout}
-                className="bg-secondary text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
                 disabled={loading} // Desactivar botón si está en loading
               >
                 {loading ? 'Cerrando sesión...' : 'Cerrar sesión'}

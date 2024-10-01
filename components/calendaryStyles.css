@@ -1,29 +1,37 @@
 .custom-calendar {
-    background-color: #1a1a1a;
-    border: none;
-    color: #fff;
-    width: 100%;
-    max-width: 1200px;
-    height: 350px;
+  background-color: #1a1a1a;
+  border: none;
+  color: #fff;
+  width: 100%;
+  /* Eliminar o ajustar el max-width para mejorar el diseño en móviles */
+  max-width: 100%; /* Esto asegura que el calendario ocupe el ancho completo en móviles */
+  height: auto; /* Permitir que la altura se ajuste dinámicamente */
+}
+
+@media (min-width: 768px) {
+  .custom-calendar {
+    max-width: 1200px; /* Limitar el ancho solo en pantallas grandes */
+    height: 350px; /* Mantener una altura fija en pantallas más grandes */
   }
-  
-  .custom-calendar .react-calendar__tile {
-    background-color: #333;
-    border-radius: 12px;
-    color: #fff;
-  }
-  
-  .custom-calendar .react-calendar__tile:enabled:hover,
-  .custom-calendar .react-calendar__tile--active {
-    background-color: #4a4a4a;
-  }
-  
-  .custom-calendar .react-calendar__tile--now {
-    background-color: #ff5a5f;
-    color: white;
-  }
-  
-  .custom-calendar .react-calendar__navigation button {
-    background-color: transparent;
-    color: #fff;
-  }
+}
+
+.custom-calendar .react-calendar__tile {
+  background-color: #333;
+  border-radius: 0px;
+  color: #fff;
+}
+
+.custom-calendar .react-calendar__tile:enabled:hover,
+.custom-calendar .react-calendar__tile--active {
+  background-color: #4a4a4a;
+}
+
+.custom-calendar .react-calendar__tile--now {
+  background-color: #ff5a5f;
+  color: white;
+}
+
+.custom-calendar .react-calendar__navigation button {
+  background-color: transparent;
+  color: #fff;
+}
