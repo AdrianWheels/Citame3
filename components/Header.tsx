@@ -11,6 +11,7 @@ const Header = () => {
   const { user } = useSupabaseAuth(); // Usamos el hook personalizado para obtener el usuario
   const [loading, setLoading] = useState(false);
   const [isScrolledToTop, setIsScrolledToTop] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleLogout = async () => {
     setLoading(true);
@@ -30,6 +31,30 @@ const Header = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // Verificar si el usuario es super admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user) {
+        const superAdminEmail = process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAIL;
+        if (user.email === superAdminEmail) {
+          setIsAdmin(true);
+        } else {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('is_super_admin')
+            .eq('id', user.id)
+            .single();
+
+          if (data && !error) {
+            setIsAdmin(data.is_super_admin);
+          }
+        }
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   return (
     <header
@@ -52,13 +77,23 @@ const Header = () => {
         {/* Navigation */}
         <nav className="flex items-center space-x-4">
           {user ? (
-            <button
-              onClick={handleLogout}
-              className="bg-secondary  text-white px-4 py-2 rounded hover:bg-red-600 transition"
-              disabled={loading} // Desactivar botón si está en loading
-            >
-              {loading ? 'Cerrando sesión...' : 'Cerrar sesión'}
-            </button>
+            <>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                >
+                  Administrar
+                </Link>
+              )}
+              <button
+                onClick={handleLogout}
+                className="bg-secondary text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                disabled={loading} // Desactivar botón si está en loading
+              >
+                {loading ? 'Cerrando sesión...' : 'Cerrar sesión'}
+              </button>
+            </>
           ) : (
             <>
               <Link
