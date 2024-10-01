@@ -1,14 +1,14 @@
 'use client';
 
 import CustomCalendar from '@/components/CustomCalendar';
-import Header from '@/components/Header'; // Importamos el Header
+import Header from '@/components/Header';
 
 export default function Home() {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-between">
       <Header />
       <main className="flex-grow flex flex-col items-center justify-center py-6 px-4" style={{ paddingTop: '80px' }}>
-        <div className="w-full max-w-md bg-white rounded-lg p-4">
+        <div className="w-full max-w-4xl h-[700px] bg-white rounded-lg p-6"> {/* Tamaño fijo */}
           <CustomCalendar />
         </div>
       </main>
