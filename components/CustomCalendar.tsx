@@ -17,13 +17,31 @@ type CalendarValue = ValuePiece | [ValuePiece, ValuePiece];
 
 const CustomCalendar = () => {
   const { user } = useSupabaseAuth();
-  const [selectedDate, setSelectedDate] = useState<CalendarValue>(null); // No se selecciona una fecha inicialmente
+  const [selectedDate, setSelectedDate] = useState<CalendarValue>(null);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [loading, setLoading] = useState(false);
   const [shopHours, setShopHours] = useState({ opening: '08:00', closing: '20:00' });
-  const [showTimeSlots, setShowTimeSlots] = useState(false); // Nuevo estado para controlar si mostramos horarios
-  const [showModal, setShowModal] = useState(false); // Controla si mostramos el modal en móviles
+  const [showTimeSlots, setShowTimeSlots] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(false); // Detectar si estamos en un dispositivo móvil
 
+  // Detectar si estamos en móvil usando useEffect
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(window.innerWidth < 768);
+      }
+    };
+
+    // Ejecutar la detección inmediatamente
+    handleResize();
+
+    // Agregar un event listener para cambiar el estado al redimensionar la ventana
+    window.addEventListener('resize', handleResize);
+
+    // Eliminar el event listener cuando el componente se desmonte
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchShopHours = async () => {
@@ -41,20 +59,16 @@ const CustomCalendar = () => {
   }, []);
 
   const handleDateChange = async (date: CalendarValue) => {
-    if (window.innerWidth < 768) {
+    if (isMobile) {
       setShowModal(true); // Solo mostramos el modal en móviles
     }
-    
+
     if (!date || Array.isArray(date)) {
       setSelectedDate(null);
       setTimeSlots([]);
-      setShowTimeSlots(false); // Ocultar los horarios si no se selecciona una fecha válida
+      setShowTimeSlots(false);
       return;
     }
-
-    
-    
-    
 
     setSelectedDate(date);
     setShowTimeSlots(true); // Mostrar los horarios solo cuando se selecciona una fecha
@@ -198,97 +212,94 @@ const CustomCalendar = () => {
   };
 
   return (
-  <div className="p-6 max-w-screen-xl w-4/5 mx-auto bg-black shadow-lg rounded-xl">
-    <div className="mb-10 flex justify-center">
-      <Calendar
-        onChange={handleDateChange}
-        value={selectedDate}
-        locale="es"
-        className="custom-calendar"
-      />
-    </div>
-
-    {/* Modal en móviles */}
-    {showModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-    <div className="bg-gray-900 p-4 rounded-lg w-10/12 max-w-md mx-auto">
-      {/* Botón de cerrar más pequeño y alineado a la derecha */}
-      <div className="flex justify-end mb-4">
-        <button
-          className="text-white text-sm bg-red-500 px-3 py-1 hover:bg-red-600 transition"
-          onClick={handleCloseModal}
-        >
-          X
-        </button>
+    <div className="p-6 max-w-screen-xl w-4/5 mx-auto bg-black shadow-lg rounded-xl">
+      <div className="mb-10 flex justify-center">
+        <Calendar
+          onChange={handleDateChange}
+          value={selectedDate}
+          locale="es"
+          className="custom-calendar"
+        />
       </div>
 
-      {loading ? (
-        <p className="text-center text-gray-400">Cargando horarios...</p>
-      ) : (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-          {timeSlots.length > 0 ? (
-            timeSlots.map((slot, index) => (
+      {/* Modal en móviles */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-4 rounded-lg w-10/12 max-w-md mx-auto">
+            <div className="flex justify-end mb-4">
               <button
-                key={index}
-                className={`w-full h-12 rounded-lg text-center font-medium transition ${
-                  slot.status === 'confirmed'
-                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-800 text-white border border-gray-600 hover:bg-gray-700'
-                }`}
-                onClick={() => slot.status === 'available' && handleBooking(slot.time)}
-                disabled={slot.status === 'confirmed'}
+                className="text-white text-sm bg-red-500 px-3 py-1 hover:bg-red-600 transition"
+                onClick={handleCloseModal}
               >
-                {slot.time} <br />{' '}
-                <span className={`${slot.status === 'confirmed' ? 'text-red-500' : 'text-green-500'}`}>
-                  {slot.status === 'confirmed' ? 'Ocupado' : 'Disponible'}
-                </span>
+                X
               </button>
-            ))
-          ) : (
-            <p className="text-center text-gray-400 col-span-2">No hay horarios disponibles.</p>
-          )}
-        </div>
-      )}
-    </div>
-  </div>
-)}
+            </div>
 
-
-    {/* Panel de horas solo en pantallas grandes */}
-    {!showModal && window.innerWidth >= 768 && showTimeSlots && selectedDate && (
-      <>
-        {loading ? (
-          <p className="text-center text-gray-500">Cargando horarios...</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {timeSlots.length > 0 ? (
-              timeSlots.map((slot, index) => (
-                <button
-                  key={index}
-                  className={`w-[100px] h-[80px] rounded-lg text-center font-medium transition ${
-                    slot.status === 'confirmed'
-                      ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                      : 'bg-gray-900 text-white border border-gray-600 hover:bg-gray-700'
-                  }`}
-                  onClick={() => slot.status === 'available' && handleBooking(slot.time)}
-                  disabled={slot.status === 'confirmed'}
-                >
-                  {slot.time} <br />{' '}
-                  <span className={`${slot.status === 'confirmed' ? 'text-red-500' : 'text-green-500'}`}>
-                    {slot.status === 'confirmed' ? 'Ocupado' : 'Disponible'}
-                  </span>
-                </button>
-              ))
+            {loading ? (
+              <p className="text-center text-gray-400">Cargando horarios...</p>
             ) : (
-              <p className="text-center text-gray-500">No hay horarios disponibles.</p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                {timeSlots.length > 0 ? (
+                  timeSlots.map((slot, index) => (
+                    <button
+                      key={index}
+                      className={`w-full h-12 rounded-lg text-center font-medium transition ${
+                        slot.status === 'confirmed'
+                          ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                          : 'bg-gray-800 text-white border border-gray-600 hover:bg-gray-700'
+                      }`}
+                      onClick={() => slot.status === 'available' && handleBooking(slot.time)}
+                      disabled={slot.status === 'confirmed'}
+                    >
+                      {slot.time} <br />{' '}
+                      <span className={`${slot.status === 'confirmed' ? 'text-red-500' : 'text-green-500'}`}>
+                        {slot.status === 'confirmed' ? 'Ocupado' : 'Disponible'}
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-center text-gray-400 col-span-2">No hay horarios disponibles.</p>
+                )}
+              </div>
             )}
           </div>
-        )}
-      </>
-    )}
-  </div>
-);
+        </div>
+      )}
 
+      {/* Panel de horas solo en pantallas grandes */}
+      {!showModal && !isMobile && showTimeSlots && selectedDate && (
+        <>
+          {loading ? (
+            <p className="text-center text-gray-500">Cargando horarios...</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {timeSlots.length > 0 ? (
+                timeSlots.map((slot, index) => (
+                  <button
+                    key={index}
+                    className={`w-[100px] h-[80px] rounded-lg text-center font-medium transition ${
+                      slot.status === 'confirmed'
+                        ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                        : 'bg-gray-900 text-white border border-gray-600 hover:bg-gray-700'
+                    }`}
+                    onClick={() => slot.status === 'available' && handleBooking(slot.time)}
+                    disabled={slot.status === 'confirmed'}
+                  >
+                    {slot.time} <br />{' '}
+                    <span className={`${slot.status === 'confirmed' ? 'text-red-500' : 'text-green-500'}`}>
+                      {slot.status === 'confirmed' ? 'Ocupado' : 'Disponible'}
+                    </span>
+                  </button>
+                ))
+              ) : (
+                <p className="text-center text-gray-500">No hay horarios disponibles.</p>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
 };
 
 export default CustomCalendar;
