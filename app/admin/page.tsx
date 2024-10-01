@@ -8,10 +8,32 @@ import DefaultHoursForm from "@/components/DefaultHoursForm";
 import CloseDaysCalendar from "@/components/CloseDaysCalendar";
 import { supabase } from "@/lib/supabaseClient"; 
 
+
+interface ShopOwnerData {
+  id: number;
+  token_expiry: string | null; // Asumimos que será una cadena de texto en formato ISO o null
+  default_opening_time: string; // Asumimos que 'time without time zone' es un string en formato 'HH:mm:ss'
+  default_closing_time: string;
+  morning_opening_time: string;
+  morning_closing_time: string;
+  afternoon_opening_time: string;
+  afternoon_closing_time: string;
+  secondary_color: string | null;
+  primary_font: string | null;
+  email: string;
+  phone: string | null;
+  google_access_token: string | null;
+  google_refresh_token: string | null;
+  secondary_font: string | null;
+  shop_title: string | null;
+  primary_color: string | null;
+}
+
+
 const AdminPage = () => {
   const { user } = useSupabaseAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [shopOwnerData, setShopOwnerData] = useState(null); // Estado para almacenar los datos del dueño
+  const [shopOwnerData, setShopOwnerData] = useState<ShopOwnerData | null>(null); // Usamos la nueva interfaz
   const router = useRouter();
 
   useEffect(() => {
@@ -24,19 +46,19 @@ const AdminPage = () => {
         const { data, error } = await supabase
           .from("shop_owners")
           .select("*")
-          .eq("id", 2) // Asegúrate de que exista un registro con id = 1
+          .eq("id", 2) // Ajusta el id según sea necesario
           .single(); // Esto solo debe devolver una fila
-        
+
         if (error) {
           console.error("Error fetching shop owner data:", error);
         } else if (data) {
           // Formatear correctamente los datos de tipo TIME para JavaScript
           setShopOwnerData({
             ...data,
-            morning_opening_time: data.morning_opening_time  ,
-            morning_closing_time: data.morning_closing_time ,
-            afternoon_opening_time: data.afternoon_opening_time ,
-            afternoon_closing_time: data.afternoon_closing_time ,
+            morning_opening_time: data.morning_opening_time,
+            morning_closing_time: data.morning_closing_time,
+            afternoon_opening_time: data.afternoon_opening_time,
+            afternoon_closing_time: data.afternoon_closing_time,
           });
         }
       }
@@ -45,11 +67,10 @@ const AdminPage = () => {
     checkAdminStatus();
   }, [user]);
 
-  const handleGoogleCalendarSync = () => {  
+  const handleGoogleCalendarSync = () => {
     // Especifica la ruta de callback manualmente
     signIn("google", { callbackUrl: "http://localhost:3000/api/auth/callback/google" });
   };
-  
 
   if (!isAdmin) {
     return <p>Loading...</p>;
@@ -77,20 +98,20 @@ const AdminPage = () => {
           <div className="border p-4">
             <h3 className="text-lg font-bold mb-4">Turno de Mañana</h3>
             {shopOwnerData && (
-              <DefaultHoursForm 
-                turno="mañana" 
-                openingTime={shopOwnerData.morning_opening_time} 
-                closingTime={shopOwnerData.morning_closing_time} 
+              <DefaultHoursForm
+                turno="mañana"
+                openingTime={shopOwnerData.morning_opening_time}
+                closingTime={shopOwnerData.morning_closing_time}
               />
             )}
           </div>
           <div className="border p-4">
             <h3 className="text-lg font-bold mb-4">Turno de Tarde</h3>
             {shopOwnerData && (
-              <DefaultHoursForm 
-                turno="tarde" 
-                openingTime={shopOwnerData.afternoon_opening_time} 
-                closingTime={shopOwnerData.afternoon_closing_time} 
+              <DefaultHoursForm
+                turno="tarde"
+                openingTime={shopOwnerData.afternoon_opening_time}
+                closingTime={shopOwnerData.afternoon_closing_time}
               />
             )}
           </div>
