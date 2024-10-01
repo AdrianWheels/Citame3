@@ -8,7 +8,7 @@ export default function Home() {
     <div className="min-h-screen w-full flex flex-col items-center justify-between">
       <Header />
       <main className="flex-grow flex flex-col items-center justify-center py-6 px-4" style={{ paddingTop: '80px' }}>
-        <div className="w-full max-w-4xl h-[700px] bg-white rounded-lg p-6"> {/* Tamaño fijo */}
+        <div className="w-full max-w-4xl h-[700px] bg-white rounded-lg p-6">
           <CustomCalendar />
         </div>
       </main>

@@ -122,26 +122,63 @@ const CustomCalendar = () => {
 
   const fetchBookings = async (formattedDate: string) => {
     try {
-      const { data, error } = await supabase
+      // Realizar la consulta a ambas tablas: `shop_schedule` y `reservations`
+      const { data: scheduleData, error: scheduleError } = await supabase
+        .from('shop_schedule')
+        .select('is_holiday, opening_time, closing_time')
+        .eq('date', formattedDate)
+        .maybeSingle();  // Usamos maybeSingle para manejar casos sin filas
+  
+      if (scheduleError) {
+        throw scheduleError;
+      }
+  
+      // Verificar si es fin de semana
+      const isWeekend = (date: string) => {
+        const dayOfWeek = new Date(date).getDay(); // 0 = Domingo, 6 = Sábado
+        return dayOfWeek === 0 || dayOfWeek === 6;
+      };
+  
+      if (scheduleData?.is_holiday || isWeekend(formattedDate)) {
+        // Si es festivo o fin de semana, no hay horas disponibles
+        setTimeSlots([]);
+        return;
+      }
+  
+      // Si no hay horarios especiales, usamos los horarios por defecto
+      const shopOpeningTime = scheduleData?.opening_time || shopHours.opening;
+      const shopClosingTime = scheduleData?.closing_time || shopHours.closing;
+  
+      // Obtener las reservas para ese día
+      const { data: reservationsData, error: reservationsError } = await supabase
         .from('reservations')
         .select('*')
         .eq('date', formattedDate);
-
-      if (error) throw error;
-
+  
+      if (reservationsError) {
+        throw reservationsError;
+      }
+  
+      // Mapear las reservas existentes
       const bookingsMap = new Map<string, 'available' | 'confirmed' | 'pending'>();
-
-      data?.forEach((booking) => {
+  
+      reservationsData?.forEach((booking) => {
         const formattedHour = booking.hour.slice(0, 5);
         bookingsMap.set(formattedHour, booking.status as 'available' | 'confirmed' | 'pending');
       });
-
-      const slots: TimeSlot[] = generateTimeSlots(shopHours.opening, shopHours.closing, bookingsMap);
+  
+      // Generar los horarios disponibles con base en los horarios de la tienda
+      const slots: TimeSlot[] = generateTimeSlots(shopOpeningTime, shopClosingTime, bookingsMap);
       setTimeSlots(slots);
     } catch (error) {
       console.error('Error fetching bookings:', error);
+      // En caso de error, podemos devolver los horarios por defecto de la tienda
+      const slots: TimeSlot[] = generateTimeSlots(shopHours.opening, shopHours.closing, new Map());
+      setTimeSlots(slots);
     }
   };
+  
+  
 
   const generateTimeSlots = (
     openingTime: string,
